@@ -1,0 +1,5 @@
+services:
+  larawax:
+    build:
+      context: .
+      target: prod

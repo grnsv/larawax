@@ -1,0 +1,65 @@
+services:
+  larawax:
+    build:
+      context: .
+      target: dev
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    entrypoint: php artisan octane:frankenphp --workers=1 --max-requests=1 --port='${APP_PORT:-80}'
+    ports:
+      - '${APP_PORT:-80}:80'
+    environment:
+      XDG_CACHE_HOME: /tmp/cache
+      XDG_CONFIG_HOME: /tmp/config
+      XDG_DATA_HOME: /tmp/data
+      XDEBUG_MODE: '${XDEBUG_MODE:-off}'
+      XDEBUG_CONFIG: '${XDEBUG_CONFIG:-client_host=host.docker.internal}'
+      XDEBUG_TRIGGER: '${XDEBUG_TRIGGER:-}'
+      IGNITION_LOCAL_SITES_PATH: '${PWD}'
+    user: '${DOCKER_UID:-1000}:${DOCKER_GID:-1000}'
+    volumes:
+      - .:/app
+    depends_on:
+      - pgsql
+      - redis
+  pgsql:
+    image: 'postgres:17'
+    ports:
+      - '${FORWARD_DB_PORT:-5432}:5432'
+    environment:
+      PGPASSWORD: '${DB_PASSWORD:-secret}'
+      POSTGRES_DB: '${DB_DATABASE}'
+      POSTGRES_USER: '${DB_USERNAME}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - 'sail-pgsql:/var/lib/postgresql/data'
+      - './vendor/laravel/sail/database/pgsql/create-testing-database.sql:/docker-entrypoint-initdb.d/10-create-testing-database.sql'
+    healthcheck:
+      test:
+        - CMD
+        - pg_isready
+        - '-q'
+        - '-d'
+        - '${DB_DATABASE}'
+        - '-U'
+        - '${DB_USERNAME}'
+      retries: 3
+      timeout: 5s
+  redis:
+    image: 'redis:alpine'
+    ports:
+      - '${FORWARD_REDIS_PORT:-6379}:6379'
+    volumes:
+      - 'sail-redis:/data'
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      retries: 3
+      timeout: 5s
+volumes:
+  sail-pgsql:
+    driver: local
+  sail-redis:
+    driver: local

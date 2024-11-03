@@ -6,11 +6,21 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "ext-bcmath": "*",
+        "ext-curl": "*",
+        "ext-intl": "*",
+        "ext-mbstring": "*",
+        "ext-pcntl": "*",
+        "ext-pdo_pgsql": "*",
+        "ext-redis": "*",
+        "ext-zend-opcache": "*",
+        "ext-zip": "*",
         "laravel/framework": "^11.9",
         "laravel/octane": "^2.5",
         "laravel/tinker": "^2.9"
     },
     "require-dev": {
+        "ext-xdebug": "*",
         "fakerphp/faker": "^1.23",
         "laravel/pail": "^1.1",
         "laravel/pint": "^1.13",
