@@ -22,8 +22,9 @@ services:
     depends_on:
       - pgsql
       - redis
+      - node
   pgsql:
-    image: 'postgres:17'
+    image: 'postgres:17-alpine'
     ports:
       - '${FORWARD_DB_PORT:-5432}:5432'
     environment:
@@ -58,8 +59,18 @@ services:
         - ping
       retries: 3
       timeout: 5s
+  node:
+    image: node:22-alpine
+    tty: true
+    working_dir: /app
+    user: '${DOCKER_UID:-1000}:${DOCKER_GID:-1000}'
+    volumes:
+      - .:/app
+      - npm-cache:/root/.npm/_cacache/
 volumes:
   sail-pgsql:
     driver: local
   sail-redis:
+    driver: local
+  npm-cache:
     driver: local
